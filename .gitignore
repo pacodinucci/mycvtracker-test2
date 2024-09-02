@@ -1,0 +1,21 @@
+# Ignore macOS system files
+.DS_Store
+__MACOSX/
+
+# Ignore environment variables
+.env
+
+# Ignore build output
+next/
+next/cache
+next/server
+next/static
+
+# Ignore IDE-specific files
+.vscode/
+*.iml
+
+# Ignore node_modules
+node_modules/
+
+yarn.lock

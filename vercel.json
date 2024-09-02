@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "interview-app/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/interview-app/(.*)",
+      "dest": "/interview-app/$1"
+    }
+  ]
+}

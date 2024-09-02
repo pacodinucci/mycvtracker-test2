@@ -1,0 +1,78 @@
+.startRecording {
+    background-color: #2a93d5; /* Green background */
+    color: white; /* White text */
+    padding: 10px 20px; /* Padding around the text */
+    font-size: 16px; /* Font size */
+    border: none; /* Remove the default border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition for background color */
+  }
+  
+  .startRecording:hover{
+    color: white;
+    background-color: #2a93d5; /*  */  
+  }
+  
+  .startRecording:active{
+    color: white;
+    background-color: #2a93d5; /*  */
+  }
+  .text{
+    font-style:normal;
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bold;
+  }
+  
+  .linkText {
+    color:#2a93d5;
+    ; /* Blue color for the link */
+    text-decoration: none; /* Remove the underline */
+    font-weight: bold; /* Make the text bold */
+    font-size: 16px; /* Set the font size */
+  }
+  
+  .linkText:hover {
+    
+    text-decoration: underline; /* Underline the text on hover */
+  }
+  
+  .button:hover{
+    background-color: #2a93d5; /*  */
+    
+  }
+  /* Container for buttons and additional spacing */
+  .buttonContainer {
+    text-align: center; /* Center the buttons within the container */
+    margin-top: 20px; /* Add some space at the top */
+  }
+  
+  /* Common styles for all buttons */
+.button {
+    background-color: #2a93d5;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #ffffff;
+      border: none;
+      padding: .4rem 1.8rem;
+  }
+  
+  /* Start Recording button specific styles */
+  .startButton {
+    background-color:  #2a93d5; /* Red background color */
+  }
+  
+  
+  /* Stop Recording button specific styles */
+  .stopButton {
+    background-color: #2a93d5; /* Green background color */
+  }
+
+
+.videoSize{
+    width: 500px;
+    height: 380px;
+  margin-top:50px
+   
+}

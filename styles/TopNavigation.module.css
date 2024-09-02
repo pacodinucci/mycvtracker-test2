@@ -1,0 +1,32 @@
+.navbar {
+	background-color: #1e222c;
+	font-size: 16px;
+}
+.dropdown {
+	background-color: transparent;
+	border: none;
+	color: #fff;
+	font-size: 16px;
+}
+
+.dropdown:hover,
+.dropdown:active,
+.dropdown:focus,
+.dropdown:focus-visible {
+	color: #3492be !important;
+	background-color: transparent !important;
+	border: none;
+}
+
+.login {
+	text-decoration: none;
+	color: #fff;
+}
+
+.signupBtn {
+	background: #3492be;
+	padding: 7px 25px;
+	color: #fff;
+	text-decoration: none;
+	border-radius: 0;
+}

@@ -1,0 +1,94 @@
+.container {
+	background-color: #1e222c;
+	width: 100vw;
+	padding: 4rem 0 8rem 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1.5rem;
+}
+.message {
+	font-size: 1.9rem;
+	color: #ffffff;
+	font-weight: bold;
+	text-align: center;
+}
+.hr {
+	display: block;
+	height: 1px;
+	width: 50px;
+	background-color: #f2f4f5;
+}
+.instruction {
+	min-height: 150px;
+	width: 70%;
+	border-radius: 5px;
+	padding: 0.8rem 1rem 3rem 1rem;
+	background-color: #eeeeee;
+	color: #999999;
+	font-size: 14px;
+	font-weight: 700;
+}
+.instruction > span {
+	margin-left: 3rem;
+}
+.message_2,
+.message_3,
+.message_4 {
+	width: 70%;
+	text-align: center;
+	padding: 1rem;
+	border-radius: 4px;
+	font-size: 1rem;
+	font-weight: bold;
+}
+.message_2 {
+	color: #31708f;
+	background-color: #d9edf7;
+}
+.message_3 {
+	color: #cb8a89;
+	background-color: #f2dedd;
+}
+.message_4 {
+	background-color: #dfefd8;
+	color: #3b763d;
+}
+.btn_group {
+	display: flex;
+	gap: 0.4rem;
+}
+.stop_btn,
+.start_btn,
+.skip_btn,
+.next_btn {
+	background-color: #337ab7;
+	border-radius: 4px;
+	font-size: 1rem;
+	font-weight: bold;
+	color: #ffffff;
+	border: none;
+	padding: 0.4rem 2rem;
+}
+.stop_btn:disabled,
+.start_btn:disabled,
+.skip_btn:disabled,
+.next_btn:disabled {
+	opacity: 0.6;
+}
+.stop_btn {
+	background-color: #337ab7;
+}
+.start_btn {
+	background-color: #5cb85c;
+}
+.skip_btn {
+	background-color: #ec971f;
+}
+.next_btn {
+	background-color: #ffffff;
+	color: black;
+}
+.submit_btn {
+	margin-top: 90px;
+}

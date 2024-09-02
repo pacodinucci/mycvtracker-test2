@@ -1,0 +1,158 @@
+.audioSection{
+    text-align:Center;
+    background-color:white;
+
+    padding:80px
+}
+
+.interviewbtn{
+    background-color:lightblue;
+    border-radius:10px;
+    padding:24px;
+    color:white;
+    border:none;
+    font-weight:bold
+}
+
+.audiopos{
+    position:abs;
+    top:230px;
+    left:400px
+}
+
+.startRecording {
+    background-color: #0e6bb7; /* Green background */
+    color: white; /* White text */
+    padding: 10px 20px; /* Padding around the text */
+    font-size: 16px; /* Font size */
+    border: none; /* Remove the default border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition for background color */
+  }
+  
+  .startRecording:hover{
+    color: white;
+    background-color:#0e6bb7; /*  */
+  }
+  
+  .startRecording:active{
+    color: white;
+    background-color: #0e6bb7; /*  */
+  }
+.text{
+    
+    font-style:normal;
+    font-family: 'Times New Roman', Times, serif;
+}
+.audioplayer {
+    width: 100%; /* Full width */
+    height: 40px; /* Fixed height */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    outline: none; /* Remove default outline */
+    border: 1px solid #ccc; /* Light border */
+  }
+
+.videoSize{
+    width: 500px;
+    height: 380px,
+}
+
+
+
+.start_int_svg {
+  -webkit-box-align: center;
+  align-items: center;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 30px 0px;
+  cursor: pointer;
+  background: rgb(125, 0, 254);
+  color: rgb(255, 255, 255);
+  display: flex;
+  font-weight: 700;
+  -webkit-box-pack: center;
+  justify-content: center;
+  outline: none;
+  pointer-events: initial;
+  transform: perspective(1000px) translateZ(0px);
+  transition: all 0.1s ease-in-out 0s;
+  border-radius: 16px;
+  flex-direction: row;
+  width: 100%;
+  max-width: 285px;
+  height: 60px;
+  font-size: 18px;
+  line-height: 24px;
+  text-transform: none;
+  letter-spacing: initial;
+  text-align: center;
+  margin: 0px;
+  margin-top:20px
+}
+/*margin-top: 34px;
+margin-left:500px*/
+
+.start_int_svg svg {
+  fill: white;
+  height: 24px;
+ /* margin-bottom: 11px; */
+}
+
+
+
+
+
+.start_int_svg2 {
+  -webkit-box-align: center;
+  align-items: center;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 30px 0px;
+  cursor: pointer;
+  background: rgb(125, 0, 254);
+  color: rgb(255, 255, 255);
+  display: flex;
+  font-weight: 700;
+  -webkit-box-pack: center;
+  justify-content: center;
+  outline: none;
+  pointer-events: initial;
+  transform: perspective(1000px) translateZ(0px);
+  transition: all 0.1s ease-in-out 0s;
+  border-radius: 16px;
+  flex-direction: row;
+  width: 100%;
+  max-width: 285px;
+  height: 60px;
+  font-size: 18px;
+  line-height: 24px;
+  text-transform: none;
+  letter-spacing: initial;
+  text-align: center;
+  margin: 0px;
+  margin-top: 34px;
+  margin-left:250px
+}
+
+
+.start_int_svg2 svg {
+  fill: white;
+  height: 24px;
+ /* margin-bottom: 11px; */
+}
+
+
+.error_message {
+  font-size:55px;
+  padding:50px;
+  font-weight:900
+}
+
+.error_message h1{
+  text-align:center
+}
+.error_message p{
+  text-align:center;
+  margin-left:10px
+}
+

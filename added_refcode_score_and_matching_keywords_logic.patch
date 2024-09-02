@@ -1,0 +1,1003 @@
+Subject: [PATCH] added refcode score and matching keywords logic
+---
+Index: mycv-tracker-interview/components/AudioController_new.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/mycv-tracker-interview/components/AudioController_new.tsx b/mycv-tracker-interview/components/AudioController_new.tsx
+--- a/mycv-tracker-interview/components/AudioController_new.tsx	(revision 6f7378e68ab111fc06c159a1a6302bdbc6225314)
++++ b/mycv-tracker-interview/components/AudioController_new.tsx	(date 1700650112940)
+@@ -148,7 +148,7 @@
+                     {(play == 'stop_recording') ?
+                         <> <span className={styles.record_fsize}>Recording Stopped.
+                         </span>
+-                            {(currectQuestion == 0) && <div className={styles.listen_fsize}>Listen your recording.</div>}
++                            {/* {(currectQuestion == 0) && <div className={styles.listen_fsize}>Listen your recording.</div>} */}
+                         </>
+                         :
+                         (play == 'uploading') ?
+@@ -165,7 +165,7 @@
+                             <path clip-rule="evenodd" d="M37.326 33.822c0-2.408 2.695-3.835 4.687-2.481l20.862 14.178c1.752 1.19 1.752 3.772 0 4.963L42.013 64.66c-1.992 1.354-4.687-.072-4.687-2.48V33.821z" fill="#000" fill-rule="evenodd"></path>
+                             </svg>
+                             </button> */}
+-                            {blob && (
++                            {/* {blob && (
+                                 <div className={styles.preview}>
+                                     <PrevResponse
+                                         source={blob ? URL.createObjectURL(blob) : ""}
+@@ -174,7 +174,7 @@
+ 
+                                     />
+                                 </div>
+-                            )}
++                            )} */}
+                         </> :
+                         <>
+                             <div className={styles.stoprec_wrapper}>
+Index: mycv-tracker-interview/pages/bookinterview.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/mycv-tracker-interview/pages/bookinterview.tsx b/mycv-tracker-interview/pages/bookinterview.tsx
+--- a/mycv-tracker-interview/pages/bookinterview.tsx	(revision 6f7378e68ab111fc06c159a1a6302bdbc6225314)
++++ b/mycv-tracker-interview/pages/bookinterview.tsx	(date 1700156209108)
+@@ -35,6 +35,8 @@
+ 
+ let skill_set : string | null;
+ let refCode_set : string | null;
++let mcq_set: boolean | null;
++let im_set: string | null;
+  
+ const BookInterview_slot = () => {
+     const { showErrorToast, showSuccessToast } = useToast();
+@@ -43,6 +45,8 @@
+     const [showSuccess, setShowSuccess] = useState(false);
+     const [paramSkills, setParamSkills] = useState<any | null>(null);
+     const [refCodeupdate, setRefCode] = useState<any | null>(null);
++    const [mcq, setMCQ] = useState<any | null>(null);
++    const [interviewMode, setIM] = useState<any | null>(null);
+ 
+     const details = useForm({
+         initialValues: {
+@@ -51,16 +55,16 @@
+             mobile: "",
+             location: "",
+             skills: "",
+-            refCode:''
++            refCode:'',
++            mcq: 'false',
++            interviewMode:'audio1'
+         },
+         validate: {
+             candidateName: (value) => (value.length <= 1 ? "Candidate name cannot be empty" : null),
+             candidateEmail: (value) =>
+                 /^\S+@\S+$/.test(value) ? null : "Invalid Candidate Email",
+             mobile: (value) => (value.length <= 9 ? "Mobile number cannot be empty and enter 10 digits" : null),
+-            location: (value) => (value.length <= 2 ? "Location cannot be empty" : null),
+-            skills: (value) =>
+-            value.length < 1 ? "Select atleast 1 skill" : null,
++            location: (value) => (value.length <= 2 ? "Location cannot be empty" : null)
+         },
+     });
+ 
+@@ -69,8 +73,12 @@
+         const queryParams = new URLSearchParams(window.location.search);
+          skill_set= queryParams.get("skills");
+          refCode_set = queryParams.get("refCode");
++         mcq_set = queryParams.get("mcq");
++         im_set = queryParams.get("interviewMode");
+          setRefCode(refCode_set);
+          setParamSkills(skill_set);
++         setMCQ(mcq_set);
++         setIM(im_set);
+     }, [])
+ 
+     const handleFormSubmit = useCallback(
+@@ -78,6 +86,12 @@
+            if(refCode_set){
+             values.refCode = refCode_set;
+            }
++           if(mcq_set){
++           values.mcq = mcq_set;
++           }
++           if(im_set){
++           values.interviewMode = im_set;
++           }
+               try {
+                 setIsLoading(true);
+                 if(skill_set){
+@@ -152,6 +166,7 @@
+                         label="Skills"
+                         placeholder="Please select maximum of two skills"
+                         // value={details.values.skills}
++                        required="false"
+                         onChange={handleMultiSelect}
+                     />
+                   }
+Index: mycv-tracker-interview/pages/_mcq.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/mycv-tracker-interview/pages/_mcq.tsx b/mycv-tracker-interview/pages/_mcq.tsx
+new file mode 100644
+--- /dev/null	(date 1694869551894)
++++ b/mycv-tracker-interview/pages/_mcq.tsx	(date 1694869551894)
+@@ -0,0 +1,358 @@
++import React, { useState, useEffect, useCallback, useMemo } from "react";
++import { Alert, Button, Container, Header, Box, Modal, Flex, Title, Progress, Text, Checkbox } from "@mantine/core";
++import { useRouter } from "next/router";
++import AudioController from "../components/AudioController";
++import { getMyQuestions } from "../apis/mycvtracker/questions";
++import { Question } from "../types/question_types";
++import Instructions from "../components/Instructions";
++import { submitAnswer } from "../apis/mycvtracker/submit_interview";
++import styles from "../styles/questionAdd.module.css";
++import AudioController_new from "../components/AudioController_new";
++import { useUserState } from "../hooks/useUserState";
++import { authRoutes } from "../data/route";
++import Mcq_controller from "./mcq_controller";
++
++
++const MAX_AUDIO_DURATION = 60;
++
++type Operation = "startInterview" | "loading" | "recording" | "countdown" | "stopped";
++type play = "play_rec" | "stop_recording" | "uploading";
++let allQuetions: any[] = [];
++let demo_questions: any[] = [];
++let tech_questions: any[] = [];
++const Mcq_interview = () => {
++    const router = useRouter();
++    const [token, setToken] = useState("");
++    const [types, setTypes] = useState<string[]>([]);
++    const [hasPermission, setHasPermission] = useState<boolean | null>(null);
++    const [questions, setQuestions] = useState<Question[]>([]);
++    const [demoquestions, setDemoQuestions] = useState<Question[]>([]);
++    const [currectQuestion, setCurrentQuestion] = useState(-1);
++    const [countDownTimer, setCountDownTimer] = useState(5);
++    const [countdownInterval, setCountdownInterval] = useState<NodeJS.Timer | null>(null);
++    const [operation, setOperation] = useState<Operation>("startInterview");
++    const [showInstructions, setShowInstructions] = useState(true);
++    const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
++    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
++    const [isUploading, setIsUploading] = useState(false);
++    const [play, setPlay] = useState<play>("play_rec");
++    const { user, isLoading: isLoadingUser } = useUserState();
++
++    useEffect(() => {
++        const initialize = async () => {
++            const stream = await navigator.mediaDevices.getUserMedia({
++                audio: true,
++            });
++            const mediaRecorder = new MediaRecorder(stream);
++            mediaRecorder.addEventListener("dataavailable", (event) => {
++                console.log(event);
++                setAudioBlob(event.data);
++            });
++            setRecorder(mediaRecorder);
++        };
++
++        initialize();
++
++        // if (user === null && !isLoadingUser) {
++        //     document.addEventListener('contextmenu', event => {
++        //         event.preventDefault();
++        //     });
++
++        //     document.onkeydown = function (e) {
++        //         if (e.ctrlKey &&
++        //             (e.keyCode === 67 ||
++        //                 e.keyCode === 86 ||
++        //                 e.keyCode === 85 ||
++        //                 e.keyCode === 16 ||
++        //                 e.keyCode === 73 ||
++        //                 e.keyCode === 117)) {
++        //             return false;
++        //         } else {
++        //             return true;
++        //         }
++        //     }
++        // };
++    }, [user, isLoadingUser]);
++
++    useEffect(() => {
++        if (router.query.token) {
++            if (!Array.isArray(router.query.token)) {
++                setToken(router.query.token);
++                // TODO: Enable before deployment
++                router.replace(router.asPath, router.route, { shallow: true });
++            }
++        }
++        if (router.query.interviewType) {
++            console.log(router.query.interviewType);
++            setTypes(Array.isArray(router.query.interviewType) ? router.query.interviewType : [router.query.interviewType]);
++        }
++    }, [router]);
++
++    // TODO: Enable before deployment
++    useEffect(() => {
++        navigator.mediaDevices
++            .getUserMedia({ audio: true })
++            .then(() => setHasPermission(true))
++            .catch(() => setHasPermission(false));
++    }, []);
++
++    const startCountdown = useCallback(() => {
++        setCountDownTimer(30);
++        const time = setInterval(() => {
++            setCountDownTimer((prev) => prev - 1);
++        }, 1000);
++        setCountdownInterval((prev) => {
++            if (prev !== null) clearInterval(prev);
++            return time;
++        });
++        setOperation("countdown");
++    }, []);
++
++    const startRecording = useCallback(() => {
++        setOperation("recording");
++        setPlay("play_rec");
++        // setCountDownTimer(MAX_AUDIO_DURATION);
++        // if (recorder) {
++        //     recorder.start((MAX_AUDIO_DURATION + 3) * 1000);
++        // } else {
++        //     console.log("error");
++        // }
++    }, [recorder]);
++
++    const stopRecording = useCallback(() => {
++        if (recorder) recorder.stop();
++        setPlay("stop_recording");
++        setOperation("recording");
++        //setOperation("stopped");
++        setCountdownInterval((prev) => {
++            if (prev !== null) clearInterval(prev);
++            return null;
++        });
++    }, [recorder]);
++
++    const uploadAudio = useCallback(
++        async (data: Blob | null, duration: number, question: number) => {
++            // skipQuestion();
++            //  setOperation("countdown");
++            //  startCountdown();
++            setPlay("uploading");
++
++            // if (data === null) return;
++            // if (questions.length === 0 || question === -1) return;
++            try {
++                // const url = URL.createObjectURL(data);
++                // console.log(url);
++                // const fd = new FormData();
++                // fd.append("file", data, new Date().toISOString());
++                // fd.set("Candidate", token);
++                // fd.set("questionId", questions[question].id.toString());
++                // fd.set("attemptTime", duration.toString());
++                setIsUploading(true);
++                // const response = await submitAnswer(fd);
++                // setAudioBlob(null);
++                setOperation("countdown");
++                startCountdown();
++                setCurrentQuestion((prev) => prev + 1);
++            } catch (e) {
++                console.log("error");
++            } finally {
++                setIsUploading(false);
++            }
++        },
++        [token, questions, startCountdown]
++    );
++
++    const startInterview = useCallback(
++        (startfrom: number) => {
++            setCurrentQuestion(startfrom);
++            startCountdown();
++        },
++        [startCountdown]
++    );
++
++    useEffect(() => {
++        if (countDownTimer <= 0) {
++            if (operation === "countdown") {
++                startRecording();
++            } else if (operation === "recording") {
++                // stop recording
++                stopRecording();
++            }
++        }
++    }, [countDownTimer, startRecording, operation, stopRecording]);
++
++    const getQuestions = useCallback(
++        async (token: string, types: string[]) => {
++            try {
++                const response = await getMyQuestions(token, "Demo01");
++                demo_questions = [...response]
++                if (response) {
++                    setDemoQuestions(response);
++                }
++            } catch (e: any) {
++                setToken("");
++                console.log(e);
++            }
++            try {
++                const response = await getMyQuestions(token, types.join("_"));
++                if (response) {
++                    tech_questions = [...response]
++                }
++            } catch (e: any) {
++                setToken("");
++                console.log(e);
++            }
++            try {
++                const hr_questions = await getMyQuestions(token, "Hr01");
++                if (hr_questions) {
++                    console.log(hr_questions);
++                    (demo_questions && tech_questions && hr_questions) ? allQuetions = [...demo_questions, ...tech_questions, ...hr_questions] : allQuetions = [];
++                    startInterview(0);
++                    setQuestions(allQuetions);
++                }
++            } catch (e: any) {
++                setToken("");
++                console.log(e);
++            }
++
++        },
++        [startInterview]
++    );
++
++    const handleStartInterview = useCallback(
++        (token: string, types: string[]) => {
++            // if (hasPermission && types.length > 0 && token.length > 2) {
++            setOperation("loading");
++            getQuestions(token, types);
++            //   } else {
++            //     // Throw Error
++            //   }
++        },
++        [hasPermission, getQuestions]
++    );
++
++    const skipQuestion = useCallback(() => {
++        stopRecording();
++        startCountdown();
++        setCurrentQuestion((prev) => prev + 1);
++    }, [startCountdown, stopRecording]);
++
++    if (questions.length > 0 && currectQuestion >= questions.length) {
++        return (
++            <Container>
++                <Title order={1} align="center">
++                    Thank you for attending the interview
++                </Title>
++                <Title order={3} align="center">
++                    Our team will evalute the answers and get back to you
++                </Title>
++                <Title order={6} align="center">
++                    If you have any doubts, you can contact us at info@mycvtracker.com
++                </Title>
++            </Container>
++        );
++    }
++
++    return (
++        <Box>
++            <Modal opened={showInstructions} onClose={() => setShowInstructions(false)} size="xl">
++                <Instructions />
++            </Modal>
++            <Box pt={85} />
++            <Header fixed={true} height={140} mt={70} p={0} style={{ zIndex: 9, maxHeight: 500, height: 555 }}>
++                <Flex direction="column" p="sm">
++                    <Flex direction="row" align="center" justify="space-between" gap="lg">
++                        {(operation !== 'startInterview') &&
++                            <Flex style={{ width: "100%" }} direction="column">
++                                <Progress
++                                    value={(currectQuestion / questions.length) * 100}
++                                    style={{ width: "100%", maxWidth: 300, height: 12, marginTop: 10, marginLeft: 10 }}
++                                    size="sm"
++                                />
++                                <Text fz="sm" className={styles.quetion_bold} style={{ marginLeft: 10 }}>{`Question  : ${currectQuestion + 1} of ${questions.length}`}</Text>
++
++                            </Flex>
++                        }
++                        {(operation === 'startInterview') && <Button size="xs" className={styles.instructions_btn} onClick={() => setShowInstructions(true)} style={{ alignSelf: "flex-end" }}>
++                            Show Instructions
++                        </Button>
++                        }
++                    </Flex>
++
++                    <div className={styles.quetion_total}>{currectQuestion > -1 && allQuetions[currectQuestion].question}
++                        {currectQuestion > -1 && <div className={styles.mcq_checkbox}> <Checkbox
++                            mt={16}
++                            label="private"
++                            checked={
++                                true
++                            }
++                        />
++                            <Checkbox
++                                mt={16}
++                                label="public"
++                                checked={
++                                    true
++                                }
++                            />
++                            <Checkbox
++                                mt={16}
++                                label="private"
++                                checked={
++                                    false
++                                }
++                            />
++                            <Checkbox
++                                mt={16}
++                                label="private"
++                                checked={
++                                    false
++                                }
++                            />
++                        </div>
++                        }
++                    </div>
++                    <Mcq_controller
++                        operation={operation}
++                        totalQuestions={questions.length}
++                        currectQuestion={currectQuestion}
++                        timeLeft={countDownTimer}
++                        isUploading={isUploading}
++                        startInterview={() => handleStartInterview(token, types)}
++                        stopRecording={stopRecording}
++                        skipQuestion={skipQuestion}
++                        blob={audioBlob}
++                        uploadAnswer={() => uploadAudio(audioBlob, countDownTimer, currectQuestion)}
++                        play={play}
++                    />
++
++                </Flex>
++            </Header>
++            <Container style={{ marginTop: 50 }}>
++                {token.length < 1 && (
++                    <Alert title="Invalid Token" color="red">
++                        Invalid Token, Please Check the link. Please check the link.
++                    </Alert>
++                )}
++                {types.length < 1 && (
++                    <Alert title="No Interview Types" color="red">
++                        No Interview types detected. Please check the link.
++                    </Alert>
++                )}
++
++                {hasPermission === false && (
++                    <Alert title="No Permission" color="red">
++                        Please provide permissions for audio
++                    </Alert>
++                )}
++                {hasPermission === null && (
++                    <Alert title="Checking Permission" color="blue">
++                        Requesting Permission for Audio, please click allow.
++                    </Alert>
++                )}
++                {/* <div className={styles.quetion_fsize}>{currectQuestion > -1 && questions[currectQuestion].question}</div> */}
++            </Container>
++        </Box>
++    );
++};
++
++export default Mcq_interview;
+Index: mycv-tracker-interview/.env
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/mycv-tracker-interview/.env b/mycv-tracker-interview/.env
+--- a/mycv-tracker-interview/.env	(revision 6f7378e68ab111fc06c159a1a6302bdbc6225314)
++++ b/mycv-tracker-interview/.env	(date 1694856601297)
+@@ -1,2 +1,2 @@
+-NEXT_PUBLIC_MYCVTRACKER_API_HOST=https://mycvtracker.com/new-apis
+-# NEXT_PUBLIC_MYCVTRACKER_API_HOST=http://localhost:8080
++#NEXT_PUBLIC_MYCVTRACKER_API_HOST=https://mycvtracker.com/new-apis
++NEXT_PUBLIC_MYCVTRACKER_API_HOST=http://localhost:8080
+Index: MyCvTracker/src/app/shared/constants.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/MyCvTracker/src/app/shared/constants.js b/MyCvTracker/src/app/shared/constants.js
+--- a/MyCvTracker/src/app/shared/constants.js	(revision 6f7378e68ab111fc06c159a1a6302bdbc6225314)
++++ b/MyCvTracker/src/app/shared/constants.js	(date 1694709130334)
+@@ -14,8 +14,8 @@
+             },
+ 
+             // baseUrl: 'http://ec2-18-221-201-185.us-east-2.compute.amazonaws.com:8080',
+-           // baseUrl: 'http://localhost:8080',
+-            baseUrl: 'https://mycvtracker.com/apis',
++            baseUrl: 'http://localhost:8080',
++            //baseUrl: 'https://mycvtracker.com/apis',
+             viewUrl : 'https://mycvtracker.com',
+             websocket:{
+                 reconnect: 5000,
+Index: mycv-tracker-interview/pages/mcq_controller.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/mycv-tracker-interview/pages/mcq_controller.tsx b/mycv-tracker-interview/pages/mcq_controller.tsx
+new file mode 100644
+--- /dev/null	(date 1694869580206)
++++ b/mycv-tracker-interview/pages/mcq_controller.tsx	(date 1694869580206)
+@@ -0,0 +1,142 @@
++import { Alert, Button, Flex, Loader, RingProgress, Text, Title } from "@mantine/core";
++import { useMediaQuery } from "@mantine/hooks";
++import React from "react";
++import { FaCircle } from "react-icons/fa";
++// import PrevResponse from "./PrevResponse";
++import styles from "../styles/questionAdd.module.css";
++import alanBtn from "@alan-ai/alan-sdk-web";
++import { useEffect } from 'react';
++import audio from "../assets/homepage/audio.svg";
++import PrevResponse from "../components/PrevResponse";
++
++// import { useSpeechSynthesis } from "react-speech-kit";
++
++type Props = {
++    timeLeft: number;
++    operation: "startInterview" | "loading" | "recording" | "countdown" | "stopped";
++    totalQuestions: number;
++    currectQuestion: number;
++    isUploading: boolean;
++    startInterview: () => void;
++    stopRecording: () => void;
++    skipQuestion: () => void;
++    uploadAnswer: () => void;
++    blob: Blob | null;
++    play: "play_rec" | "stop_recording" | "uploading"
++};
++
++const Mcq_controller = ({
++    timeLeft,
++    operation,
++    blob,
++    startInterview,
++    stopRecording,
++    skipQuestion,
++    uploadAnswer,
++    isUploading,
++    play,
++    currectQuestion,
++    totalQuestions
++}: Props) => {
++    // const { speak } = useSpeechSynthesis(); 
++    const media = useMediaQuery("(max-width: 767px)");
++
++    if (operation === "startInterview") {
++        return (
++            <>
++            <div  className={styles.rfire_fsize}>This is multiple choice quetions assesment</div>
++            <Flex align="center" justify="center" style={{ height: 362 }}>
++            
++                <div>
++                    <button  data-qa="video-button" className={styles.start_int_svg} onClick={startInterview}>
++                        {/* <svg fill="none" height="24" width="27" xmlns="http://www.w3.org/2000/svg">
++                            <rect height="16" rx="3" width="18" y="4"></rect>
++                            <path clip-rule="evenodd" d="M20 10.425a1 1 0 01.563-.899l5-2.432a1 1 0 011.437.9v8.012a1 1 0 01-1.413.91l-5-2.264a1 1 0 01-.587-.91v-3.317z"></path>
++                        </svg> */}
++                        {/* <img src={audio} alt="step 1" /> */}
++                        Start Interview</button>
++                </div>
++              
++            </Flex>
++            </>
++        );
++    }
++
++    if (operation === "loading") {
++        return (
++            <Flex align="center" justify="space-between" style={{ height: 85 }}>
++                <Title order={3}>Loading Questions..</Title>
++                <Loader size={70} />
++            </Flex>
++        );
++    }
++
++    if (operation === "countdown") {
++        return (
++            <Flex align="center" justify="space-between" style={{ height: 85, flexDirection: 'column', alignItems: 'end' }}>
++                 <div className={styles.progress}>
++      <RingProgress
++      style={{marginLeft:28}}
++        size={media ? 80 : 100}
++        sections={[{ value: (timeLeft / 60) * 100, color: timeLeft < 10 ? "red" : "blue" }]}
++        label={
++          <Text align="center" size={media ? "sm" : "md"}>
++            {timeLeft} sec
++          </Text>
++        }
++      />
++    
++       
++      </div>
++                {/* <div>
++                    <Title order={3} className={styles.record_fsize}>Recording Starts in</Title>
++                </div> */}
++
++                {/* <div className={styles.ring_animation}>
++                    <div className={styles.ring_transform}>
++                        <div>
++                            <div role="button" aria-pressed="false"></div>
++                        </div></div><div className={styles.recording_starts}>
++                        <span>{timeLeft} sec</span>
++                    </div>
++                    <button aria-label="Start recording" data-qa="record-button" className={styles.start_recording} >
++                    </button>
++                  
++                </div> */}
++            </Flex>
++        );
++    }
++
++    if (operation === "stopped") {
++        return (
++            <Flex align="center" justify="flex-start" style={{ height: 85 }}>
++                <Flex
++                    align="center"
++                    justify="space-between"
++                    direction={{ base: "column", xs: "row" }}
++                    gap={{ base: 2, sm: "lg" }}
++                    style={{ marginTop: 32 }}
++                >
++
++                </Flex>
++            </Flex>
++        );
++    }
++
++    return (
++        <>
++           
++
++            <div className={styles.qution_mtop}>
++                <Flex align="center" justify="space-between" style={{ height: 85, marginTop: 80, flexDirection: "column" }} className={styles.qution_mtop}>
++                   
++                    <Button onClick={uploadAnswer} disabled={isUploading} compact={media} className={styles.next}>
++                            {(currectQuestion == totalQuestions-1) ? "Finish Interview" : "Next Question"}
++                            </Button>
++                </Flex>
++            </div>
++        </>
++    );
++};
++
++export default Mcq_controller;
+Index: mycv-tracker-interview/pages/audioresponse.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/mycv-tracker-interview/pages/audioresponse.tsx b/mycv-tracker-interview/pages/audioresponse.tsx
+new file mode 100644
+--- /dev/null	(date 1700650632248)
++++ b/mycv-tracker-interview/pages/audioresponse.tsx	(date 1700650632248)
+@@ -0,0 +1,323 @@
++import React, { useState, useEffect, useCallback, useMemo } from "react";
++import { Alert, Button, Container, Header, Box, Modal, Flex, Title, Progress, Text } from "@mantine/core";
++import { useRouter } from "next/router";
++import AudioController from "../components/AudioController";
++import { getMyQuestions } from "../apis/mycvtracker/questions";
++import { Question } from "../types/question_types";
++import Instructions from "../components/Instructions";
++import { submitAnswer } from "../apis/mycvtracker/submit_interview";
++import styles from "../styles/questionAdd.module.css";
++import AudioController_new from "../components/AudioController_new";
++import { useUserState } from "../hooks/useUserState";
++import { authRoutes } from "../data/route";
++
++
++const MAX_AUDIO_DURATION = 60;
++
++type Operation = "startInterview" | "loading" | "recording" | "countdown" | "stopped";
++type play = "play_rec" | "stop_recording" | "uploading";
++let allQuetions: any[] = [];
++let demo_questions: any[] = [];
++let tech_questions: any[] = [];
++const Interview_app = () => {
++  const router = useRouter();
++  const [token, setToken] = useState("");
++  const [types, setTypes] = useState<string[]>([]);
++  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
++  const [questions, setQuestions] = useState<Question[]>([]);
++  const [demoquestions, setDemoQuestions] = useState<Question[]>([]);
++  const [currectQuestion, setCurrentQuestion] = useState(-1);
++  const [countDownTimer, setCountDownTimer] = useState(5);
++  const [countdownInterval, setCountdownInterval] = useState<NodeJS.Timer | null>(null);
++  const [operation, setOperation] = useState<Operation>("startInterview");
++  const [showInstructions, setShowInstructions] = useState(true);
++  const [recorder, setRecorder] = useState<MediaRecorder | null>(null);
++  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
++  const [isUploading, setIsUploading] = useState(false);
++  const [play, setPlay] = useState<play>("play_rec");
++  const { user, isLoading: isLoadingUser } = useUserState();
++
++  useEffect(() => {
++    const initialize = async () => {
++      const stream = await navigator.mediaDevices.getUserMedia({
++        audio: true,
++      });
++      const mediaRecorder = new MediaRecorder(stream);
++      mediaRecorder.addEventListener("dataavailable", (event) => {
++        console.log(event);
++        setAudioBlob(event.data);
++      });
++      setRecorder(mediaRecorder);
++    };
++
++    initialize();
++    
++    if (user === null && !isLoadingUser) {
++      document.addEventListener('contextmenu', event => {
++        event.preventDefault();
++    });
++   
++  document.onkeydown = function(e) {
++    if (e.ctrlKey && 
++        (e.keyCode === 67 || 
++         e.keyCode === 86 || 
++         e.keyCode === 85 || 
++         e.keyCode === 16 || 
++         e.keyCode === 73 || 
++         e.keyCode === 117)) {
++        return false;
++    } else {
++        return true;
++    }
++  }
++};
++}, [user, isLoadingUser]);
++
++  useEffect(() => {
++    if (router.query.token) {
++      if (!Array.isArray(router.query.token)) {
++        setToken(router.query.token);
++        // TODO: Enable before deployment
++        router.replace(router.asPath, router.route, { shallow: true });
++      }
++    }
++    if (router.query.interviewType) {
++      console.log(router.query.interviewType);
++      setTypes(Array.isArray(router.query.interviewType) ? router.query.interviewType : [router.query.interviewType]);
++    }
++  }, [router]);
++
++  // TODO: Enable before deployment
++  useEffect(() => {
++    navigator.mediaDevices
++      .getUserMedia({ audio: true })
++      .then(() => setHasPermission(true))
++      .catch(() => setHasPermission(false));
++  }, []);
++
++  const startCountdown = useCallback(() => {
++    setCountDownTimer(10);
++    const time = setInterval(() => {
++      setCountDownTimer((prev) => prev - 1);
++    }, 1000);
++    setCountdownInterval((prev) => {
++      if (prev !== null) clearInterval(prev);
++      return time;
++    });
++    setOperation("countdown");
++  }, []);
++
++  const startRecording = useCallback(() => {
++    setOperation("recording");
++    setPlay("play_rec");
++    setCountDownTimer(MAX_AUDIO_DURATION);
++    if (recorder) {
++      recorder.start((MAX_AUDIO_DURATION + 3) * 1000);
++    } else {
++      console.log("error");
++    }
++  }, [recorder]);
++
++  const stopRecording = useCallback(() => {
++    if (recorder) recorder.stop();
++    setPlay("stop_recording");
++    setOperation("recording");
++    //setOperation("stopped");
++    setCountdownInterval((prev) => {
++      if (prev !== null) clearInterval(prev);
++      return null;
++    });
++  }, [recorder]);
++
++  const uploadAudio = useCallback(
++    async (data: Blob | null, duration: number, question: number) => {
++     // skipQuestion();
++    //  setOperation("countdown");
++    //  startCountdown();
++    setPlay("uploading");
++    // if (recorder) recorder.stop();
++   
++    // setOperation("recording");
++    // //setOperation("stopped");
++    // setCountdownInterval((prev) => {
++    //   if (prev !== null) clearInterval(prev);
++    //   return null;
++    // });
++    
++      if (data === null) return;
++      if (questions.length === 0 || question === -1) return;
++      try {
++        const url = URL.createObjectURL(data);
++        console.log(url);
++        const fd = new FormData();
++        fd.append("file", data, new Date().toISOString());
++        fd.set("Candidate", token);
++        fd.set("questionId", questions[question].id.toString());
++        fd.set("attemptTime", duration.toString());
++        setIsUploading(true);
++        const response = await submitAnswer(fd);
++        setAudioBlob(null);
++        setOperation("countdown");
++        startCountdown();
++        setCurrentQuestion((prev) => prev + 1);
++      } catch (e) {
++        console.log("error");
++      } finally {
++        setIsUploading(false);
++      }
++    },
++    [token, questions, startCountdown]
++  );
++
++  const startInterview = useCallback(
++    (startfrom: number) => {
++      setCurrentQuestion(startfrom);
++      startCountdown();
++    },
++    [startCountdown]
++  );
++
++  useEffect(() => {
++    if (countDownTimer <= 0) {
++      if (operation === "countdown") {
++        startRecording();
++      } else if (operation === "recording") {
++        // stop recording
++        stopRecording();
++      }
++    }
++  }, [countDownTimer, startRecording, operation, stopRecording]);
++
++  const getQuestions = useCallback(
++    async (token: string, types: string[]) => {
++
++      try {
++        const response = await getMyQuestions(token, types.join("_"));
++        if (response) {
++          tech_questions =  [...response]
++        }
++      } catch (e: any) {
++        setToken("");
++        console.log(e);
++      }
++       try {
++        allQuetions = [...tech_questions];
++        startInterview(0);
++        setQuestions(allQuetions);
++
++      } catch (e: any) {
++        setToken("");
++        console.log(e);
++      }
++
++    },
++    [startInterview]
++  );
++
++  const handleStartInterview = useCallback(
++    (token: string, types: string[]) => {
++      if (hasPermission && types.length > 0 && token.length > 2) {
++        setOperation("loading");
++        getQuestions(token, types);
++      } else {
++        // Throw Error
++      }
++    },
++    [hasPermission, getQuestions]
++  );
++
++  const skipQuestion = useCallback(() => {
++    stopRecording();
++    startCountdown();
++    setCurrentQuestion((prev) => prev + 1);
++  }, [startCountdown, stopRecording]);
++
++  if (questions.length > 0 && currectQuestion >= questions.length) {
++    return (
++      <Container>
++        <Title order={1} align="center">
++          Thank you for sharing your audio response
++        </Title>
++        <Title order={3} align="center">
++          Our team will share your response with the relevant team member.
++        </Title>
++        <Title order={6} align="center">
++          If you have any queries, you can contact us at info@mycvtracker.com
++        </Title>
++      </Container>
++    );
++  }
++
++  return (
++    <Box>
++      <Modal opened={showInstructions} onClose={() => setShowInstructions(false)} size="xl">
++        <Instructions />
++      </Modal>
++      <Box pt={85} />
++      <Header fixed={true} height={140} mt={70} p={0} style={{ zIndex: 9, maxHeight: 500, height: 555 }}>
++        <Flex direction="column" p="sm">
++          <Flex direction="row" align="center" justify="space-between" gap="lg">
++          {(operation !== 'startInterview') &&  
++            <Flex style={{ width: "100%" }} direction="column">
++              <Progress
++                value={(currectQuestion / questions.length) * 100}
++                style={{ width: "100%", maxWidth: 300, height: 12, marginTop: 10, marginLeft: 10 }}
++                size="sm"
++              />
++              <Text fz="sm"  className={styles.quetion_bold} style={{ marginLeft: 10 }}>{`Question  : ${currectQuestion + 1} of ${questions.length}`}</Text>
++              
++            </Flex>
++            }
++            {(operation === 'startInterview') && <Button size="xs" className={styles.instructions_btn} onClick={() => setShowInstructions(true)} style={{ alignSelf: "flex-end" }}>
++              Show Instructions
++            </Button>
++            }
++          </Flex>
++          
++          <div className={styles.quetion_fsize}>{currectQuestion > -1 && allQuetions[currectQuestion].question}</div>
++          
++          <AudioController_new
++            operation={operation}
++            totalQuestions={questions.length}
++            currectQuestion={currectQuestion}
++            timeLeft={countDownTimer}
++            isUploading={isUploading}
++            startInterview={() => handleStartInterview(token, types)}
++            stopRecording={stopRecording}
++            skipQuestion={skipQuestion}
++            blob={audioBlob}
++            uploadAnswer={() => uploadAudio(audioBlob, countDownTimer, currectQuestion)}
++            play={play}
++          />
++
++        </Flex>
++      </Header>
++      <Container style={{ marginTop: 50 }}>
++        {token.length < 1 && (
++          <Alert title="Invalid Token" color="red">
++            Invalid Token, Please Check the link. Please check the link.
++          </Alert>
++        )}
++        {types.length < 1 && (
++          <Alert title="No Interview Types" color="red">
++            No Interview types detected. Please check the link.
++          </Alert>
++        )}
++
++        {hasPermission === false && (
++          <Alert title="No Permission" color="red">
++            Please provide permissions for audio
++          </Alert>
++        )}
++        {hasPermission === null && (
++          <Alert title="Checking Permission" color="blue">
++            Requesting Permission for Audio, please click allow.
++          </Alert>
++        )}
++        {/* <div className={styles.quetion_fsize}>{currectQuestion > -1 && questions[currectQuestion].question}</div> */}
++      </Container>
++    </Box>
++  );
++};
++
++export default Interview_app;

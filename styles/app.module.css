@@ -1,0 +1,11 @@
+
+ .componentContainer {
+    flex-grow:1;
+    display: flex;
+    min-height: calc(100vh - 70px);
+    flex-direction: column;
+
+}
+.component {
+    flex-grow:1;
+}

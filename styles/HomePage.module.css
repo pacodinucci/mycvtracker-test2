@@ -1,0 +1,252 @@
+.container {
+	width: 100vw;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 0;
+	margin: 0;
+}
+
+/* Section 1  */
+.section_1 {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2rem;
+	background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+		url("../assets/homepage/main-img.jpg");
+	background-size: cover;
+	background-repeat: no-repeat;
+	min-height: 600px;
+	padding: 100px 0px;
+}
+.heading {
+	text-align: center;
+	white-space: pre;
+	font-size: 1.5rem;
+	color: white;
+	line-height: 2rem;
+	font-weight: 700;
+}
+.upload_box {
+	background: rgba(6, 16, 53, 0.6);
+	border: 2px dashed rgba(244, 244, 247, 0.6);
+	color: #fff;
+	width: fit-content;
+	padding: 1.5rem 1rem;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2rem;
+}
+.upload_text {
+	font-size: 0.9rem;
+	text-align: center;
+	font-weight: 700;
+}
+.upload_btn {
+	background-color: #337ab7;
+	color: #fff;
+	font-size: 0.9rem;
+	font-weight: bold;
+	border-radius: 0.5rem;
+	border: none;
+	padding: 0.4rem 1rem;
+	margin-bottom: 2rem;
+}
+.upload_btn:hover {
+	background-color: #286090;
+}
+.upload_drag_drop {
+	position: relative;
+	left: 0;
+	top: 0;
+}
+.upload_btn_img {
+	width: 120px;
+	height: 120px;
+	z-index: 2;
+}
+.upload_animated_circle {
+	position: absolute;
+	top: -25px;
+	left: -25px;
+	z-index: 2;
+	background: rgba(255, 255, 255, 0.13);
+	width: 170px;
+	height: 170px;
+	border-radius: 50%;
+	animation: animation linear 1s infinite alternate;
+}
+@keyframes animation {
+	0% {
+		transform: scale(0.7);
+	}
+	100% {
+		transform: scale(1.1);
+	}
+}
+
+/* Section 2 */
+.section_2 {
+	width: 100%;
+	background-color: #fff;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2rem;
+	padding: 5rem 0;
+}
+.section_2_title {
+	text-decoration: none;
+	color: #337ab7;
+	font-size: 1.8rem;
+	font-weight: 700;
+}
+.section_2_sub_title {
+	font-size: 0.9rem;
+	text-align: center;
+	font-weight: 600;
+}
+.hr {
+	background-color: #bfc2c6;
+	display: block;
+	height: 1px;
+	width: 40px;
+}
+.flex_box {
+	width: 70%;
+	display: flex;
+	gap: 2rem;
+}
+.box {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.6rem;
+}
+.box_step_heading {
+	font-size: 1.2rem;
+	font-weight: bold;
+	line-height: 1.5rem;
+	text-align: center;
+}
+.box_step_content {
+	font-size: 0.9rem;
+	font-weight: 500;
+	text-align: justify;
+}
+
+/* Section 3 */
+
+.section_3 {
+	background-color: #1e222c;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2rem;
+	padding: 5rem 0;
+}
+.section_3_title {
+	font-size: 2rem;
+	text-align: center;
+	line-height: 2rem;
+	font-weight: bold;
+	color: #fff;
+}
+.box_service_heading {
+	color: #3d7e9f;
+	font-size: 1.2rem;
+	font-weight: bold;
+	line-height: 1.3rem;
+	text-align: center;
+}
+.box_service_content {
+	font-size: 0.9rem;
+	font-weight: 500;
+	text-align: justify;
+	color: white;
+}
+.box_service_read_more {
+	text-decoration: none;
+	color: #337ab7;
+}
+.box_service_read_more:hover {
+	color: #286090;
+}
+
+/* Section 4 */
+.section_4 {
+	background-color: #fff;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 2rem;
+	padding: 5rem 0;
+}
+.section_4_title {
+	font-size: 2rem;
+	text-align: center;
+	line-height: 2rem;
+	font-weight: bold;
+}
+.form {
+	width: 50%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+}
+.form_line_1 {
+	width: 100%;
+	display: flex;
+	gap: 1rem;
+}
+.form_input_1 {
+	flex: 1;
+	border: 1px solid #ccc;
+	border-radius: 0.3rem;
+	padding: 0.4rem 1rem;
+	font-size: 0.9rem;
+}
+.form_input_2 {
+	width: 100%;
+	border: 1px solid #ccc;
+	border-radius: 0.3rem;
+	padding: 0.4rem 1rem;
+	font-size: 0.9rem;
+	min-height: 12rem;
+}
+.form_input_1::placeholder,
+.form_input_2::placeholder {
+	color: #999999;
+}
+.form_send_message_btn {
+	background-color: #337ab7;
+	color: #fff;
+	font-size: 0.9rem;
+	font-weight: bold;
+	border-radius: 0.5rem;
+	border: none;
+	padding: 0.4rem 1rem;
+	margin-bottom: 2rem;
+	width: 10rem;
+}
+.form_send_message_btn:hover {
+	background-color: #286090;
+}
+
+.modaltest{
+    color:#fff
+  }
+  .modalcontent {
+	background-color: #1f193f !important;
+	color: #fff;
+  	
+  }
+  .close {
+	margin: 1.125rem 1.125rem 0 0;
+  }

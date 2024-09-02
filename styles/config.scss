@@ -1,0 +1,120 @@
+@import url("https://fonts.googleapis.com/css?family=Nunito:300,400,400i,500,600,700");
+
+$font-family-nunito: "Nunito", sans-serif;
+
+$font-family-base: $font-family-nunito;
+$font-size-base: 0.8rem;
+$line-height-base: 1.25 !default;
+
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-bold: 600;
+$font-weight-bolder: 700;
+
+$light-blue: #95def3;
+$light-blue-2: #95bbfe;
+$blue: #2a93d5;
+$dark-blue: #145388;
+$light-green: #91e2c6;
+$green: #3e884f;
+$dark-green: #0a7b83;
+$red: #c43d4b;
+$yellow: #b69329;
+$pink: #e5a7f2;
+$purple: #b0aefb;
+$orange: #ffab58;
+$white: #FFF;
+$gray: #6f6c7f;
+$blue-gray: #dfe3ec;
+$gray-100: #f7f7f7;
+$gray-200: #e9ecef;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #575d69;
+$gray-700: #495057;
+$gray-800: #343a40;
+$gray-900: #212529;
+$black: #283344;
+$body-bg: $white;
+$body-color: $black;
+$primary: $blue;
+
+$theme-colors: (
+        "primary": $blue,
+        "secondary": $gray-500,
+        "warning" : $yellow,
+        "success" : $green,
+        "danger" : $red,
+        "blue" : $blue,
+        "light-blue" : $light-blue,
+        "light-blue-2" : $light-blue-2,
+        "dark-blue" : $dark-blue,
+        "green": $green,
+        "light-green": $light-green,
+        "dark-green" : $dark-green,
+        "red" : $red,
+        "yellow" : $yellow,
+        "pink" : $pink,
+        "purple" : $purple,
+        "orange" : $orange,
+        "white" : $white,
+        "gray" : $gray,
+        "gray-100" : $gray-100,
+        "gray-200" : $gray-200,
+        "gray-300" : $gray-300,
+        "gray-400" : $gray-400,
+        "gray-500" : $gray-500,
+        "gray-600" : $gray-600,
+        "gray-700" : $gray-700,
+        "gray-800" : $gray-800,
+        "gray-900" : $gray-900,
+        "blue-gray" : $blue-gray,
+        "black" : $black,
+        "body-bg" : $body-bg
+);
+
+$min-contrast-ratio: 3;
+
+$input-box-shadow: none;
+$input-focus-box-shadow: none;
+$input-focus-border-color: $dark-blue;
+$input-btn-focus-box-shadow: none;
+$form-select-focus-box-shadow: none;
+
+/* Minxin */
+@mixin transition($args...) {
+  -webkit-transition: $args;
+  -moz-transition: $args;
+  -ms-transition: $args;
+  -o-transition: $args;
+  transition: $args;
+}
+
+@mixin transform($args...) {
+  -webkit-transform: $args;
+  -moz-transform: $args;
+  -ms-transform: $args;
+  -o-transform: $args;
+  transform: $args;
+}
+
+@mixin transform-origin($args...) {
+  -webkit-transform-origin: $args;
+  -moz-transform-origin: $args;
+  -ms-transform-origin: $args;
+  -o-transform-origin: $args;
+  transform-origin: $args;
+}
+
+@mixin transition-transform($duration, $timing, $delay:0s, $preface:webkit moz ms o spec) {
+  @each $browser in $preface {
+    @if ($browser == spec) {
+      transition: transform $duration $timing $delay;
+    } @else {
+      -#{$browser}-transition: -#{$browser}-transform $duration $timing $delay;
+    }
+  }
+}
+

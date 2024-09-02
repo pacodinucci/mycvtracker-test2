@@ -1,0 +1,36 @@
+.container {
+	background-color: #499dc4;
+	width: 100vw;
+	height: 300px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1.5rem;
+}
+.title {
+	font-size: 1.2rem;
+	font-weight: bold;
+	color: #ffffff;
+}
+.form {
+	width: 40%;
+}
+.form > input[type="email"] {
+	width: 80%;
+	outline: none;
+	border: none;
+	border-radius: 5px 0 0 5px;
+	padding: 0.4rem 1rem;
+	font-size: 1rem;
+}
+.form > input[type="submit"] {
+	width: 20%;
+	background-color: black;
+	color: white;
+	border: none;
+	border-radius: 0 5px 5px 0;
+	padding: 0.4rem 1rem;
+	font-size: 1rem;
+	font-weight: bold;
+}
